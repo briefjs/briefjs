@@ -16,7 +16,7 @@ Deadly simple declarative JavaScript framework for building UI.
 From CDN:
 
 ```html
-<script src="https://s3.ssl.qhres.com/!f8bdfee3/brief.min.js"></script>
+<script src="https://s1.ssl.qhres.com/!4619d33c/brief.min.js"></script>
 ```
 
 With NPM:
