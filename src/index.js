@@ -37,27 +37,46 @@ function taged(tagName) {
   };
 }
 
-const registedComponents = {};
-const componentKeyName = 'bk-component-';
-
-function getComponentNode(target, args) {
-  const html = target.render(innerHTML(...args));
+function renderComponentNode(target, args) {
+  let html = target.render(target.props, innerHTML(...args));
+  if(typeof html === 'function') html = html``;
   const root = document.createElement('div');
   root.innerHTML = html;
   if(root.children.length !== 1) {
     throw new Error('Component should have one root element.');
   }
-  if(!target.key) target.key = generateId('bk-');
-  root.children[0].setAttribute(componentKeyName, target.key);
+  const node = root.children[0];
+  node.setAttribute(target.key, '');
+  node.setAttribute('bk-component-root', '');
+  document.addEventListener('DOMNodeInserted', function f(e) {
+    if(target.updated) target.updated();
+    document.removeEventListener('DOMNodeInserted', f);
+  });
   return root;
 }
 
+let updatePromise = null;
+
+function update(target, args) {
+  if(updatePromise) return updatePromise;
+  updatePromise = Promise.resolve().then(() => {
+    const root = renderComponentNode(target, args);
+    const oldNode = target.node;
+    const newNode = root.children[0];
+    oldNode.parentNode.replaceChild(newNode, oldNode);
+    updatePromise = null;
+  });
+}
+
 function component(options) {
-  const defaultProps = options.prop;
+  const defaultProps = options.props;
+
   return function (...args) {
-    const target = Object.assign({}, options);
     let p = {};
     function t(...args) {
+      const target = Object.assign({}, options);
+      target.key = generateId('bk-');
+      target.update = update.bind(null, target, args);
       let props = {};
       if(typeof defaultProps === 'function') {
         props = defaultProps.call(options);
@@ -66,32 +85,36 @@ function component(options) {
       target.props = {};
       Object.keys(props).forEach((key) => {
         Object.defineProperty(target.props, key, {
-          enumerable: false,
-          configurable: true,
+          enumerable: true,
           get() {
             return props[key];
           },
           set(val) {
             props[key] = val;
-            if(target.componentWillUpdate) target.componentWillUpdate();
-            const root = getComponentNode(target, args);
-            const oldNode = target.ref;
-            const newNode = root.children[0];
-            oldNode.parentNode.replaceChild(newNode, oldNode);
-            if(target.componentDidUpdate) target.componentDidUpdate();
+            target.update();
           },
         });
       });
-      Object.defineProperty(target, 'ref', {
-        get() {
-          return document.querySelector(`[${componentKeyName}="${target.key}"]`);
+      Object.defineProperties(target, {
+        refs: {
+          get() {
+            const nodes = Array.from(document.querySelectorAll(`[${target.key}][ref],[${target.key}] [ref]`));
+            const refs = {};
+            nodes.forEach((el) => {
+              refs[el.getAttribute('ref')] = el;
+            });
+            return refs;
+          },
+        },
+        node: {
+          get() {
+            return document.querySelector(`[${target.key}]`);
+          },
         },
       });
-      if(target.componentWillMount) target.componentWillMount();
-      const root = getComponentNode(target, args);
-      registedComponents[target.key] = target;
-      return `${root.innerHTML}`;
+      return renderComponentNode(target, args).innerHTML;
     }
+
     if(args[0] && !Array.isArray(args[0])) {
       p = args[0];
       return t;
@@ -101,21 +124,8 @@ function component(options) {
   };
 }
 
-function render(el, tpl) {
-  if(typeof el === 'string') {
-    el = document.querySelector(el);
-  }
-  el.addEventListener('DOMNodeInserted', function inserted(e) {
-    const root = e.relatedNode;
-    const componentEls = root.querySelectorAll(`[${componentKeyName}]`);
-    const components = Array.from(componentEls).map(el => registedComponents[el.getAttribute(componentKeyName)]);
-    components.forEach((c) => {
-      if(c.componentDidMount) c.componentDidMount();
-    });
-    el.removeEventListener('DOMNodeInserted', inserted);
-  });
+function render(tpl, el) {
   el.innerHTML = tpl;
-  return el;
 }
 
 const tagNames = ('html,body,base,head,link,meta,style,title,'

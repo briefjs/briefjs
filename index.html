@@ -8,14 +8,13 @@
   <style>
     span {
       display: inline-block;
-      width: 50px;
-      height: 50px;
       font-size: 2rem;
     }
   </style>
 </head>
 <body>
   <div id="app"></div>
+  <!-- <script src="src/index.js"></script> -->
   <script src="dist/brief.js"></script>
   <script>
     /* eslint-disable no-console */
@@ -32,26 +31,38 @@
     const MyTag = component({
       props: {
         color: 'red;',
+        onclick: 'void(0)',
       },
-      componentDidMount() {
-        // this.ref.addEventListener('mousedown', () => {
-        //   console.log('mousedown');
-        // });
-      },
-      clicked() {
-        this.props.color = randomColor();
-      },
-      render(slot) {
-        return div({style: {color: this.props.color}, onclick: this.clicked.bind(this)})`
-          ${span`1`}
-          ${span`2`}
+      render(props, slot) {
+        return div({style: {color: props.color}, onclick: props.onclick})`
+          ${span({ref: 'foo'})`1`}
+          ${span`${props.color}`}
           ${slot}
         `;
+      },
+      updated() {
+        console.log(this.refs);
+      },
+    });
+
+    const Outer = component({
+      render(props, slot) {
+        let color = randomColor();
+        const onclick = () => {
+          color = randomColor();
+          this.update();
+        };
+        return MyTag({color, onclick})`${slot}`;
+      },
+      updated() {
+        this.node.addEventListener('mousedown', () => {
+          console.log('mousedown');
+        });
       },
     });
 
     const tpl = div`
-      ${MyTag({color: 'blue'})}
+      ${Outer`${span`abcd`}`}
       ${span`3`}
       ${span`4`}
       ${div`
@@ -59,9 +70,9 @@
       `}
     `;
 
-    console.log(tpl);
+    // console.log(tpl);
 
-    render('#app', tpl);
+    render(tpl, document.getElementById('app'));
   </script>
 </body>
 </html>
