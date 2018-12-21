@@ -1,0 +1,29 @@
+{
+  "name": "briefjs",
+  "version": "0.1.0",
+  "description": "A simple declarative JavaScript framework for building UI",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "http-server -c-1 -p3000",
+    "compile": "babel src/index.js -o lib/index.js",
+    "rollup": "rollup lib/index.js --format umd --name 'briefjs' --file dist/brief.js",
+    "minify": "uglifyjs dist/brief.js -o dist/brief.min.js",
+    "build": "npm run compile && npm run rollup && npm run minify",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": ["declarative", "JavaScript", "UI", "framework"],
+  "author": "akira-cn",
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {
+    "@babel/cli": "^7.2.3",
+    "@babel/core": "^7.2.2",
+    "@babel/preset-env": "^7.2.3",
+    "eslint": "^5.10.0",
+    "eslint-config-sprite": "^1.0.6",
+    "eslint-plugin-html": "^5.0.0",
+    "rollup": "^0.68.1",
+    "uglify-js": "^3.4.9"
+  }
+}

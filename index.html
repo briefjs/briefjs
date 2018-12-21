@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <style>
+    span {
+      display: inline-block;
+      width: 50px;
+      height: 50px;
+      font-size: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+  <script src="dist/brief.js"></script>
+  <script>
+    /* eslint-disable no-console */
+    const {tags, component, render} = briefjs;
+    const {div, span} = tags;
+
+    function randomColor() {
+      const r = Math.round(Math.random() * 255);
+      const g = Math.round(Math.random() * 255);
+      const b = Math.round(Math.random() * 255);
+      return `rgb(${r},${g},${b})`;
+    }
+
+    const MyTag = component({
+      props: {
+        color: 'red;',
+      },
+      componentDidMount() {
+        // this.ref.addEventListener('mousedown', () => {
+        //   console.log('mousedown');
+        // });
+      },
+      clicked() {
+        this.props.color = randomColor();
+      },
+      render(slot) {
+        return div({style: {color: this.props.color}, onclick: this.clicked.bind(this)})`
+          ${span`1`}
+          ${span`2`}
+          ${slot}
+        `;
+      },
+    });
+
+    const tpl = div`
+      ${MyTag({color: 'blue'})}
+      ${span`3`}
+      ${span`4`}
+      ${div`
+        ${span`5`}
+      `}
+    `;
+
+    console.log(tpl);
+
+    render('#app', tpl);
+  </script>
+</body>
+</html>
