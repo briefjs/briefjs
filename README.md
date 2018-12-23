@@ -4,7 +4,7 @@ Deadly simple declarative JavaScript framework for building UI.
 
 ## Why BriefJS?
 
-- Tiny size. (_2.3kb gzipped_)
+- Tiny size. (_< 3kb gzipped_)
 - Zero dependence.
 - Pure ES6.
 - No compiler. (_Directly use taged template strings_).
@@ -16,7 +16,7 @@ Deadly simple declarative JavaScript framework for building UI.
 From CDN:
 
 ```html
-<script src="https://s1.ssl.qhres.com/!4619d33c/brief.min.js"></script>
+<script src="https://unpkg.com/briefjs/dist/brief.min.js"></script>
 ```
 
 With NPM:

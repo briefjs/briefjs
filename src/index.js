@@ -1,44 +1,7 @@
-function generateId(prefix = '') {
-  return `${prefix}${Math.random().toString(36).slice(2)}`;
-}
-
-function innerHTML(textNodes, ...subElements) {
-  return [...subElements.map((el, i) => {
-    if(typeof el === 'function') {
-      el = el``;
-    }
-    return `${textNodes[i]}${el}`;
-  }), textNodes.slice(-1)].join('');
-}
-
-function expandAttributes(attrs) {
-  return Object.entries(attrs).map(([key, value]) => {
-    if(typeof value === 'function') {
-      const handler = generateId('e_');
-      window[handler] = value;
-      return `${key}="${handler}()"`;
-    }
-    if(value && typeof value === 'object') {
-      value = Object.entries(value).map(([key, value]) => `${key}:${value};`).join('');
-    }
-    return `${key}="${value}"`;
-  }).join(' ');
-}
-
-function taged(tagName) {
-  return function (...args) {
-    if(Array.isArray(args[0])) {
-      return `<${tagName}>${innerHTML(...args)}</${tagName}>`;
-    }
-    const attrs = args[0];
-    return function (...args) {
-      return `<${tagName} ${expandAttributes(attrs)}>${innerHTML(...args)}</${tagName}>`;
-    };
-  };
-}
+import {tags, renderTag} from 'brief-tpl';
 
 function renderComponentNode(target, args) {
-  let html = target.render(target.props, innerHTML(...args));
+  let html = target.render(target.props, renderTag(...args).join(''));
   if(typeof html === 'function') html = html``;
   const root = document.createElement('div');
   root.innerHTML = html;
@@ -75,7 +38,7 @@ function component(options) {
     let p = {};
     function t(...args) {
       const target = Object.assign({}, options);
-      target.key = generateId('bk-');
+      target.key = `bk-${Math.random().toString(36).slice(2)}`;
       target.update = update.bind(null, target, args);
       let props = {};
       if(typeof defaultProps === 'function') {
@@ -127,22 +90,6 @@ function component(options) {
 function render(tpl, el) {
   el.innerHTML = tpl;
 }
-
-const tagNames = ('html,body,base,head,link,meta,style,title,'
-  + 'address,article,aside,footer,header,h1,h2,h3,h4,h5,h6,hgroup,nav,section,'
-  + 'div,dd,dl,dt,figcaption,figure,picture,hr,img,li,main,ol,p,pre,ul,'
-  + 'a,b,abbr,bdi,bdo,br,cite,code,data,dfn,em,i,kbd,mark,q,rp,rt,rtc,ruby,'
-  + 's,samp,small,span,strong,sub,sup,time,u,var,wbr,area,audio,map,track,video,'
-  + 'embed,object,param,source,canvas,script,noscript,del,ins,'
-  + 'caption,col,colgroup,table,thead,tbody,td,th,tr,'
-  + 'button,datalist,fieldset,form,input,label,legend,meter,optgroup,option,'
-  + 'output,progress,select,textarea,'
-  + 'details,dialog,menu,menuitem,summary,'
-  + 'content,element,shadow,template,blockquote,iframe,tfoot').split(',');
-
-const tags = {};
-
-tagNames.forEach((name) => { tags[name] = taged(name) });
 
 export {
   tags,
