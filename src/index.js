@@ -1,4 +1,4 @@
-import {tags, renderTag} from 'brief-tpl';
+import {tags, renderTag} from '@briefjs/brieftpl';
 
 function renderComponentNode(target, args) {
   let html = target.render(target.props, renderTag(...args).join(''));

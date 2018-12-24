@@ -28,7 +28,7 @@ module.exports = function (env = {}) {
       rules: [
         {
           test: /\.js$/,
-          exclude: /node_modules\/(?!(brief-[\w-]+)\/).*/,
+          exclude: /node_modules\/(?!(@briefjs\/[\w-]+)\/).*/,
           use: {
             loader: 'babel-loader',
             options: babelConf,

@@ -19,7 +19,7 @@
   "author": "akira-cn",
   "license": "MIT",
   "dependencies": {
-    "brief-tpl": "^0.2.0"
+    "@briefjs/brieftpl": "^0.1.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.2.3",
